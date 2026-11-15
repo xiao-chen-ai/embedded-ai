@@ -1,6 +1,6 @@
 # 🖥️ 小臣-AI (Xiaochen-AI)
 
-**开源的嵌入式 AI 开发助手 —— 把你的 Keil 工程、串口和烧录器交给 AI。**
+**开源的嵌入式 AI 开发助手 —— 把你的 Keil 工程、串口和烧录器交给 AI。欢迎大家优化升级**
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
