@@ -1,0 +1,44 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+    - id: trailing-whitespace
+      # skills/ 为第三方注入的技能包（upstream MIT 项目原样保留），不做格式改动
+      exclude: ^skills/
+    - id: end-of-file-fixer
+      exclude: ^skills/
+    - id: check-yaml
+    - id: check-toml
+    - id: check-added-large-files
+    - id: detect-private-key
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.12.1
+  hooks:
+    - id: ruff
+      args: [ --fix ]
+      exclude: ^skills/
+    - id: ruff-format
+      exclude: ^skills/
+
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.4.1
+  hooks:
+  - id: codespell
+    # skills/ 第三方脚本使用 ser(serial)/nd(node)/Rin/FO(SPICE 术语) 等领域缩写
+    args: [--ignore-words-list, "ser,nd,fo,rin,Rin,FO,buil,crate,ontop,te,ue,assertIn"]
+    exclude: >
+            (?x)^(
+                skills/.*|
+                .*\.jsonl
+            )$
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.16.1
+  hooks:
+    - id: mypy
+      # Type-check webui only; trae_agent upstream type debt is skipped via follow_imports
+      files: ^webui/
+      args: [--follow-imports, skip, --ignore-missing-imports]
+      additional_dependencies:
+        - types-PyYAML

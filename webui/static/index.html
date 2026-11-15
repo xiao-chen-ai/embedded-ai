@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小臣-AI · 嵌入式智能开发助手</title>
+<link rel="stylesheet" href="css/app.css?v=2">
+</head>
+<body>
+
+<header id="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true"></span>
+    <span class="brand-name" id="brandName">小臣-AI</span>
+    <span class="sub">嵌入式智能开发助手</span>
+  </div>
+  <div class="top-right">
+    <span id="connDot" class="dot warn"></span><span id="connText" class="conn-text">连接中…</span>
+    <span class="ver mono" id="verText"></span>
+    <label class="model-pill" title="快速切换当前模型">
+      <span class="mp-dot" aria-hidden="true"></span>
+      <select id="modelSel"><option value="">加载中…</option></select>
+    </label>
+    <button class="icon-btn" id="btnSettings" title="模型与设置">
+      <span class="icn" data-icn="gear"></span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- ============ 聊天 ============ -->
+  <section id="panel-chat" class="panel active">
+    <aside class="side" id="dropzone">
+      <div class="side-tabs">
+        <button class="side-tab active" data-side="sessions">会话</button>
+        <button class="side-tab" data-side="files">文件</button>
+      </div>
+      <div id="side-sessions" class="side-page">
+        <div class="side-head">
+          <span class="side-title">本地会话</span>
+          <button class="icon-btn sm" id="btnNewSess" title="新建会话"><span class="icn" data-icn="plus"></span></button>
+        </div>
+        <div id="sessList"></div>
+      </div>
+      <div id="side-files" class="side-page hidden">
+        <div class="side-head">
+          <span class="side-title">Workspace 文件</span>
+          <span style="display:flex;gap:2px">
+            <button class="icon-btn sm" id="btnDownloadAll" title="打包下载整个 workspace（zip）"><span class="icn" data-icn="download"></span></button>
+            <button class="icon-btn sm" id="btnRefreshTree" title="刷新"><span class="icn" data-icn="refresh"></span></button>
+            <button class="icon-btn sm" id="btnUploadFolder" title="上传目录（保留结构）"><span class="icn" data-icn="folderUp"></span></button>
+            <button class="icon-btn sm" id="btnUpload" title="上传文件"><span class="icn" data-icn="upload"></span></button>
+          </span>
+        </div>
+        <input type="file" id="fileInput" multiple class="hidden"
+               accept=".zip,.net,.csv,.cir,.yaml,.yml,.json,.txt,.md,.h,.c,.cpp,.py,.bin,.hex,.png,.jpg,.pdf">
+        <input type="file" id="dirInput" webkitdirectory class="hidden">
+        <div id="treeWrap" style="min-height:120px"></div>
+      </div>
+    </aside>
+
+    <div class="chat-main">
+      <div class="chat-toolbar">
+        <div class="run">
+          <span id="stepBadge" class="chip dim">步数 0</span>
+          <span id="runState" class="hidden" style="display:flex;align-items:center;gap:6px">
+            <span class="spinner" style="width:13px;height:13px;border-width:2px"></span><span id="runStateText" class="pulsing">运行中</span>
+          </span>
+        </div>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="composer-wrap">
+        <div class="composer">
+          <textarea id="input" rows="1" placeholder="回车发送，Shift+Enter 换行 · 向智能体提问，例如：用 keil 技能编译这个工程…"></textarea>
+          <div class="composer-actions">
+            <span class="composer-hint">回车发送 · Shift+Enter 换行 · 会话保存在本地</span>
+            <div class="composer-btns">
+              <button class="btn danger hidden" id="btnStop"><span class="icn" data-icn="stop"></span> 停止</button>
+              <button class="btn send" id="btnSend" disabled title="发送（Ctrl+Enter）"><span class="icn" data-icn="send"></span> 发送</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ 模型设置弹窗 ============ -->
+<div id="settingsModal" class="modal-back hidden">
+  <div class="modal settings">
+    <div class="modal-head">
+      <span class="icn" data-icn="gear"></span>
+      <b>模型与设置</b>
+      <span class="chip dim" id="wsToolCount" style="margin-left:10px">—</span>
+      <button class="icon-btn x" id="btnCloseSettings" title="关闭"><span class="icn" data-icn="close"></span></button>
+    </div>
+    <div class="modal-scroll">
+      <div class="model-info-bar">
+        <span class="chip" id="wsActiveChip">使用中</span>
+        <span id="wsActiveModel" class="mono">—</span>
+        <span class="chip dim">workspace</span>
+        <span id="wsPath" class="mono">—</span>
+      </div>
+
+      <div class="add-provider-head">
+        <button class="btn" id="btnAddProvider"><span class="icn" data-icn="plus"></span> 添加模型提供商</button>
+        <span class="muted-note">一次只展开一张编辑卡；密钥只写不回显</span>
+      </div>
+      <div class="card hidden" id="addProviderCard">
+        <div class="seg-tabs">
+          <button class="seg-tab active" data-seg="builtin">第三方提供商</button>
+          <button class="seg-tab" data-seg="custom">自定义 API</button>
+        </div>
+        <div class="seg-page" id="segPage-builtin">
+          <div class="cred-field">
+            <span>提供商</span>
+            <select id="apProvider"><option value="">加载中…</option></select>
+          </div>
+          <div class="ap-note">为已有提供商补配密钥或添加模型条目；密钥同样只写不回显。</div>
+          <div class="cred-form">
+            <div class="cred-field">
+              <span>API 密钥</span>
+              <div class="key-row">
+                <input type="password" id="apKey" class="cred-key" placeholder="粘贴 API 密钥" autocomplete="new-password" spellcheck="false">
+                <button class="eye-btn" type="button" title="显示/隐藏" hidden><span class="icn" data-icn="eye"></span></button>
+              </div>
+            </div>
+            <div class="cred-field">
+              <span>Base URL（可选）</span>
+              <input type="text" id="apUrl" class="cred-url" placeholder="https://…" spellcheck="false">
+            </div>
+            <div class="cred-field">
+              <span>新模型 model_key（可选）</span>
+              <input type="text" id="apModelKey" placeholder="如 my-glm" spellcheck="false">
+            </div>
+            <div class="cred-field">
+              <span>新模型名称（可选，与 model_key 搭配）</span>
+              <div class="key-row">
+                <input type="text" id="apModelName" placeholder="如 zai-org/GLM-5.3" spellcheck="false" style="flex:1">
+                <button class="btn sm" id="btnApDiscover" title="从 API 拉取模型列表"><span class="icn" data-icn="sparkleList"></span> 获取</button>
+              </div>
+            </div>
+            <div class="cred-actions">
+              <button class="btn primary" id="btnApApply">应用</button>
+              <span class="cred-status" id="apStatus"></span>
+            </div>
+          </div>
+        </div>
+        <div class="seg-page hidden" id="segPage-custom">
+          <div class="cred-form">
+            <div class="cred-field">
+              <span>Provider 名称（唯一 id，2-32 位字母/数字/_/-）</span>
+              <input type="text" id="apcName" placeholder="如 my-relay" spellcheck="false">
+            </div>
+            <div class="cred-field">
+              <span>Base URL（必须 http(s):// 开头）</span>
+              <input type="text" id="apcUrl" placeholder="https://relay.example.com/v1" spellcheck="false">
+            </div>
+            <div class="cred-field">
+              <span>协议</span>
+              <select id="apcProto">
+                <option value="openai_compatible">OpenAI 兼容</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="openai">OpenAI</option>
+                <option value="ollama">Ollama（本地）</option>
+              </select>
+            </div>
+            <div class="cred-field">
+              <span>API 密钥（可选，ollama 本地无需）</span>
+              <div class="key-row">
+                <input type="password" id="apcKey" class="cred-key" placeholder="粘贴 API 密钥" autocomplete="new-password" spellcheck="false">
+                <button class="eye-btn" type="button" title="显示/隐藏" hidden><span class="icn" data-icn="eye"></span></button>
+              </div>
+            </div>
+            <div class="cred-field">
+              <span>首个模型名（可选，自动创建模型条目）</span>
+              <input type="text" id="apcModel" placeholder="如 zai-org/GLM-5.3" spellcheck="false">
+            </div>
+            <div class="cred-actions">
+              <button class="btn primary" id="btnApcCreate">创建提供商</button>
+              <span class="cred-status" id="apcStatus"></span>
+            </div>
+          </div>
+          <div class="ap-guide">创建成功后立即写入 <b>trae_config.yaml</b>；新提供商行会自动出现在下方列表。</div>
+          <div class="cred-actions" style="margin-top:8px">
+            <button class="btn" id="btnCopyYaml"><span class="icn" data-icn="copy"></span> 复制示例 YAML</button>
+          </div>
+          <pre class="yaml-preview mono" id="apcYaml"></pre>
+        </div>
+      </div>
+
+      <div id="providerList" class="prov-list"></div>
+
+      <div class="card">
+        <h3>外观</h3>
+        <div class="theme-grid" id="themeGrid">
+          <div class="theme-field">
+            <span class="tf-label">主色 primary</span>
+            <div class="tf-row">
+              <input type="color" id="thPrimary" value="#6366f1" title="主色">
+              <input type="text" id="thPrimaryHex" class="tf-hex mono" value="#6366f1" maxlength="7" spellcheck="false">
+            </div>
+          </div>
+          <div class="theme-field">
+            <span class="tf-label">渐变副色 secondary</span>
+            <div class="tf-row">
+              <input type="color" id="thSecondary" value="#8b5cf6" title="渐变副色">
+              <input type="text" id="thSecondaryHex" class="tf-hex mono" value="#8b5cf6" maxlength="7" spellcheck="false">
+            </div>
+          </div>
+          <div class="theme-field">
+            <span class="tf-label">点缀色 accent</span>
+            <div class="tf-row">
+              <input type="color" id="thAccent" value="#2dd4bf" title="点缀色">
+              <input type="text" id="thAccentHex" class="tf-hex mono" value="#2dd4bf" maxlength="7" spellcheck="false">
+            </div>
+          </div>
+        </div>
+        <div class="preset-row">
+          <span class="tf-label">预设主题</span>
+          <button class="preset-btn" data-theme="violet" title="紫罗兰（默认）"><i style="background:linear-gradient(135deg,#6366f1,#8b5cf6)"></i>紫罗兰</button>
+          <button class="preset-btn" data-theme="amber" title="琥珀橙"><i style="background:linear-gradient(135deg,#f59e0b,#ef4444)"></i>琥珀橙</button>
+          <button class="preset-btn" data-theme="green" title="翠绿"><i style="background:linear-gradient(135deg,#10b981,#06b6d4)"></i>翠绿</button>
+          <button class="preset-btn" data-theme="rose" title="玫瑰红"><i style="background:linear-gradient(135deg,#f43f5e,#ec4899)"></i>玫瑰红</button>
+        </div>
+        <div class="cred-actions">
+          <button class="btn" id="btnThemeReset">恢复默认</button>
+          <button class="btn primary" id="btnAppearanceSave">保存</button>
+          <span class="cred-status" id="appearanceStatus"></span>
+        </div>
+        <div class="muted-note" style="margin-top:8px">颜色变更即时预览；「保存」后写入配置，刷新页面保持。</div>
+      </div>
+
+      <div class="card">
+        <h3>工具路径 · 编译 / 烧录 / 调试</h3>
+        <div class="tp-toolbar">
+          <button class="btn primary" id="btnDetectAll"><span class="icn" data-icn="sparkle"></span> 一键探测全部</button>
+          <span class="muted-note">一键探测本机已安装的烧录/调试/构建工具，找到即自动填入</span>
+        </div>
+        <div class="panel-note" style="margin-bottom:10px">
+          <div class="tip-row">这些工具没装 C 盘也能用：填好路径，AI 编译/烧录时会直接使用绝对路径，不再盲目搜索。</div>
+        </div>
+        <div class="toolpath-list" id="toolpathList">
+          <div class="tp-row" data-tool="keil">
+            <span class="tp-label">Keil MDK <span class="mono">UV4.exe</span></span>
+            <div class="tp-main">
+              <input type="text" class="tp-input mono" placeholder="E:\Keil_v5\UV4\UV4.exe" spellcheck="false">
+              <button class="icon-btn sm tp-browse" title="浏览磁盘选择路径"><span class="icn" data-icn="folder"></span></button>
+              <button class="btn sm tp-detect"><span class="icn" data-icn="search"></span> 探测</button>
+            </div>
+            <span class="tp-status"></span>
+          </div>
+          <div class="tp-row" data-tool="atk_hswldbg">
+            <span class="tp-label">正点ATK-HSWLDBG <span class="mono">CMSIS-DAP 无线调试器</span></span>
+            <div class="tp-main">
+              <input type="text" class="tp-input mono" placeholder="E:\Keil_v5\ARM\BIN\CMSIS_AGDI.dll" spellcheck="false">
+              <button class="icon-btn sm tp-browse" title="浏览磁盘选择路径"><span class="icn" data-icn="folder"></span></button>
+              <button class="btn sm tp-detect"><span class="icn" data-icn="search"></span> 探测</button>
+            </div>
+            <span class="tp-status"></span>
+          </div>
+          <div class="tp-row" data-tool="jlink">
+            <span class="tp-label">J-Link <span class="mono">JLink.exe</span></span>
+            <div class="tp-main">
+              <input type="text" class="tp-input mono" placeholder="C:\Program Files\SEGGER\JLink\JLink.exe" spellcheck="false">
+              <button class="icon-btn sm tp-browse" title="浏览磁盘选择路径"><span class="icn" data-icn="folder"></span></button>
+              <button class="btn sm tp-detect"><span class="icn" data-icn="search"></span> 探测</button>
+            </div>
+            <span class="tp-status"></span>
+          </div>
+          <div class="tp-row" data-tool="jlink_gdb">
+            <span class="tp-label">J-Link GDB Server <span class="mono">JLinkGDBServer.exe</span></span>
+            <div class="tp-main">
+              <input type="text" class="tp-input mono" placeholder="C:\Program Files\SEGGER\JLink\JLinkGDBServer.exe" spellcheck="false">
+              <button class="icon-btn sm tp-browse" title="浏览磁盘选择路径"><span class="icn" data-icn="folder"></span></button>
+              <button class="btn sm tp-detect"><span class="icn" data-icn="search"></span> 探测</button>
+            </div>
+            <span class="tp-status"></span>
+          </div>
+          <div class="tp-row" data-tool="openocd">
+            <span class="tp-label">OpenOCD</span>
+            <div class="tp-main">
+              <input type="text" class="tp-input mono" placeholder="D:\openocd\bin\openocd.exe" spellcheck="false">
+              <button class="icon-btn sm tp-browse" title="浏览磁盘选择路径"><span class="icn" data-icn="folder"></span></button>
+              <button class="btn sm tp-detect"><span class="icn" data-icn="search"></span> 探测</button>
+            </div>
+            <span class="tp-status"></span>
+          </div>
+          <div class="tp-row" data-tool="pyocd">
+            <span class="tp-label">pyOCD</span>
+            <div class="tp-main">
+              <input type="text" class="tp-input mono" placeholder="C:\Users\&lt;你&gt;\AppData\Roaming\Python\Scripts\pyocd.exe" spellcheck="false">
+              <button class="icon-btn sm tp-browse" title="浏览磁盘选择路径"><span class="icn" data-icn="folder"></span></button>
+              <button class="btn sm tp-detect"><span class="icn" data-icn="search"></span> 探测</button>
+            </div>
+            <span class="tp-status"></span>
+          </div>
+          <div class="tp-row" data-tool="gcc">
+            <span class="tp-label">ARM GCC <span class="mono">arm-none-eabi-gcc</span></span>
+            <div class="tp-main">
+              <input type="text" class="tp-input mono" placeholder="D:\gcc-arm\bin\arm-none-eabi-gcc.exe" spellcheck="false">
+              <button class="icon-btn sm tp-browse" title="浏览磁盘选择路径"><span class="icn" data-icn="folder"></span></button>
+              <button class="btn sm tp-detect"><span class="icn" data-icn="search"></span> 探测</button>
+            </div>
+            <span class="tp-status"></span>
+          </div>
+          <div class="tp-row" data-tool="gdb">
+            <span class="tp-label">ARM GDB <span class="mono">arm-none-eabi-gdb</span></span>
+            <div class="tp-main">
+              <input type="text" class="tp-input mono" placeholder="D:\gcc-arm\bin\arm-none-eabi-gdb.exe" spellcheck="false">
+              <button class="icon-btn sm tp-browse" title="浏览磁盘选择路径"><span class="icn" data-icn="folder"></span></button>
+              <button class="btn sm tp-detect"><span class="icn" data-icn="search"></span> 探测</button>
+            </div>
+            <span class="tp-status"></span>
+          </div>
+          <div class="tp-row" data-tool="stlink">
+            <span class="tp-label">STM32 CubeProgrammer <span class="mono">STM32_Programmer_CLI.exe</span></span>
+            <div class="tp-main">
+              <input type="text" class="tp-input mono" placeholder="C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\STM32_Programmer_CLI.exe" spellcheck="false">
+              <button class="icon-btn sm tp-browse" title="浏览磁盘选择路径"><span class="icn" data-icn="folder"></span></button>
+              <button class="btn sm tp-detect"><span class="icn" data-icn="search"></span> 探测</button>
+            </div>
+            <span class="tp-status"></span>
+          </div>
+          <div class="tp-row" data-tool="make">
+            <span class="tp-label">Make</span>
+            <div class="tp-main">
+              <input type="text" class="tp-input mono" placeholder="make.exe（通常在 PATH）" spellcheck="false">
+              <button class="icon-btn sm tp-browse" title="浏览磁盘选择路径"><span class="icn" data-icn="folder"></span></button>
+              <button class="btn sm tp-detect"><span class="icn" data-icn="search"></span> 探测</button>
+            </div>
+            <span class="tp-status"></span>
+          </div>
+          <div class="tp-row" data-tool="ninja">
+            <span class="tp-label">Ninja</span>
+            <div class="tp-main">
+              <input type="text" class="tp-input mono" placeholder="ninja.exe（通常在 PATH）" spellcheck="false">
+              <button class="icon-btn sm tp-browse" title="浏览磁盘选择路径"><span class="icn" data-icn="folder"></span></button>
+              <button class="btn sm tp-detect"><span class="icn" data-icn="search"></span> 探测</button>
+            </div>
+            <span class="tp-status"></span>
+          </div>
+        </div>
+        <div class="cred-actions">
+          <button class="btn primary" id="btnToolPathsSave">保存</button>
+          <span class="cred-status" id="toolPathsStatus"></span>
+        </div>
+        <div class="muted-note" style="margin-top:8px">单行「探测」优先按输入框内容验证；空输入则扫描常见安装位置与 PATH。清空输入并保存即清除该项。</div>
+      </div>
+
+      <div class="card">
+        <h3>可用工具</h3>
+        <div id="toolChips" class="file-chips"><span class="state" style="padding:8px"><span class="spinner"></span></span></div>
+      </div>
+      <div class="card note-card">
+        <h3>说明</h3>
+        <div class="panel-note">
+          <div class="tip-row">「编辑 ▾」展开配置卡：填 API 密钥后「应用」立即写入 <code>trae_config.yaml</code>；已保存的密钥不回显，输入新值即更换。</div>
+          <div class="tip-row">「获取」按钮可从 API 拉取可用模型列表，点选回填模型名，无需手敲。</div>
+          <div class="tip-row">删除模型 / 提供商暂需在 <code>trae_config.yaml</code> 手动删除对应条目后重启。</div>
+          <div class="tip-row">本地 <b>Ollama</b> 无需密钥（灰点·本地），先 <code>ollama pull</code> 拉取模型。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 模型列表选择弹窗 ============ -->
+<div id="pickerModal" class="modal-back hidden">
+  <div class="modal picker">
+    <div class="modal-head">
+      <span class="icn" data-icn="sparkleList"></span>
+      <b id="pickerTitle">选择模型</b>
+      <span class="chip dim" id="pickerCount">—</span>
+      <button class="icon-btn x" id="pickerClose" title="关闭"><span class="icn" data-icn="close"></span></button>
+    </div>
+    <div class="picker-search">
+      <span class="icn" data-icn="search"></span>
+      <input type="text" id="pickerSearch" placeholder="搜索模型 id…" spellcheck="false">
+    </div>
+    <div id="pickerList" class="picker-list"></div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<!-- ============ 磁盘浏览弹窗 ============ -->
+<div id="fsModal" class="modal-back hidden">
+  <div class="modal fsbrowse">
+    <div class="modal-head">
+      <span class="icn" data-icn="folder"></span>
+      <b id="fsTitle">浏览磁盘</b>
+      <button class="icon-btn x" id="fsClose" title="关闭"><span class="icn" data-icn="close"></span></button>
+    </div>
+    <div class="fs-top">
+      <button class="icon-btn" id="fsUp" title="返回上级"><span class="icn" data-icn="chevron" style="transform:rotate(180deg)"></span></button>
+      <input type="text" id="fsPathInput" class="mono" placeholder="C:\Program Files\… 或 D:\" spellcheck="false">
+      <button class="btn sm" id="fsGo">前往</button>
+      <select id="fsDrive" class="fs-drive" title="切换盘符"></select>
+    </div>
+    <div class="fs-crumbs mono" id="fsCrumbs"></div>
+    <div class="fs-list" id="fsList"></div>
+    <div class="fs-foot">
+      <span class="muted-note" id="fsHint">双击文件夹进入；选择一个文件后点「选定」</span>
+      <span class="fs-selected mono" id="fsSelected"></span>
+      <button class="btn primary" id="fsPick" disabled><span class="icn" data-icn="check"></span> 选定</button>
+    </div>
+  </div>
+</div>
+<script type="module" src="js/app.js?v=2"></script>
+</body>
+</html>

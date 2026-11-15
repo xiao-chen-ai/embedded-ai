@@ -1,0 +1,77 @@
+﻿model_providers:
+  siliconflow:
+    api_key: sk-your-siliconflow-key
+    provider: openai_compatible
+    base_url: https://api.siliconflow.cn/v1
+  ollama:
+    api_key: ollama
+    provider: ollama
+    base_url: http://127.0.0.1:11434
+  deepseek:
+    api_key: ''
+    provider: openai_compatible
+    base_url: https://api.deepseek.com/v1
+  openai:
+    api_key: ''
+    provider: openai
+    base_url: https://api.openai.com/v1
+models:
+  siliconflow-glm:
+    model: zai-org/GLM-5.3
+    model_provider: siliconflow
+    max_tokens: 8192
+    temperature: 0.3
+    top_p: 1
+    top_k: 0
+    parallel_tool_calls: true
+    max_retries: 6
+  siliconflow-deepseek-v3:
+    model: deepseek-ai/DeepSeek-V3
+    model_provider: siliconflow
+    max_tokens: 8192
+    temperature: 0.3
+    top_p: 1
+    top_k: 0
+    parallel_tool_calls: true
+    max_retries: 6
+  ollama-coder:
+    model: qwen2.5-coder:7b
+    model_provider: ollama
+    max_tokens: 8192
+    temperature: 0.3
+    top_p: 1
+    top_k: 0
+    parallel_tool_calls: false
+    max_retries: 4
+  deepseek-chat:
+    model: deepseek-chat
+    model_provider: deepseek
+    max_tokens: 8192
+    temperature: 0.3
+    top_p: 1
+    top_k: 0
+    parallel_tool_calls: true
+    max_retries: 6
+  openai-gpt4o-mini:
+    model: gpt-4o-mini
+    model_provider: openai
+    max_tokens: 8192
+    temperature: 0.3
+    top_p: 1
+    top_k: 0
+    parallel_tool_calls: true
+    max_retries: 6
+agents:
+  trae_agent:
+    model: siliconflow-glm
+    max_steps: 40
+    enable_lakeview: false
+    tools:
+    - bash
+    - str_replace_based_edit_tool
+    - keil_build_flash
+    - search_skills
+    - load_skill
+    - run_skill_script
+    - sequentialthinking
+    - task_done

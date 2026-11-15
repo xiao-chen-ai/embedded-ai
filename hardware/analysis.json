@@ -1,0 +1,661 @@
+{
+  "mcu": {
+    "ref": "U1",
+    "part": "STM32F103C8T6",
+    "pinCount": 9,
+    "matched": true
+  },
+  "buses": [
+    {
+      "type": "i2c",
+      "pins": {
+        "sda": "PB9",
+        "scl": "PB8"
+      },
+      "devices": [
+        {
+          "ref": "U2",
+          "part": "BMP280"
+        }
+      ],
+      "note": "I2C 成组识别(SDA+SCL 同在 MCU 上),外设编号为推断值,请按芯片数据手册核对",
+      "_signals": [
+        {
+          "net": "I2C1_SDA",
+          "pin": "PB9",
+          "kind": "i2c",
+          "signal": "sda",
+          "auto": false
+        },
+        {
+          "net": "I2C1_SCL",
+          "pin": "PB8",
+          "kind": "i2c",
+          "signal": "scl",
+          "auto": false
+        }
+      ],
+      "_af": "I2C1"
+    }
+  ],
+  "gpio": [
+    {
+      "ref": "U1",
+      "pin": "PA0",
+      "net": "SW_USER",
+      "role": "button",
+      "direction": "in",
+      "activeLow": true,
+      "deviceRef": "SW1",
+      "label": "按键(SW_Push)"
+    },
+    {
+      "ref": "U1",
+      "pin": "PA5",
+      "net": "Net-(D1-K)",
+      "role": "led",
+      "direction": "out",
+      "activeLow": true,
+      "deviceRef": "D1",
+      "label": "LED(LED_PWR)"
+    },
+    {
+      "ref": "U1",
+      "pin": "PB0",
+      "net": "LED_STATUS",
+      "role": "led",
+      "direction": "out",
+      "activeLow": false,
+      "deviceRef": "D2",
+      "label": "LED(LED_STATUS)"
+    }
+  ],
+  "power": {
+    "rails": [
+      {
+        "name": "3V3",
+        "connections": 11
+      },
+      {
+        "name": "GND",
+        "connections": 9
+      },
+      {
+        "name": "5V",
+        "connections": 1
+      }
+    ],
+    "decouplingCount": 4
+  },
+  "pinmap": [
+    {
+      "signal": "SW_USER",
+      "port": "PA",
+      "num": 0,
+      "af": "GPIO",
+      "direction": "in",
+      "net": "SW_USER",
+      "role": "button",
+      "activeLow": true,
+      "label": "按键(SW_Push)",
+      "note": null,
+      "isBus": false
+    },
+    {
+      "signal": "D1_K",
+      "port": "PA",
+      "num": 5,
+      "af": "GPIO",
+      "direction": "out",
+      "net": "Net-(D1-K)",
+      "role": "led",
+      "activeLow": true,
+      "label": "LED(LED_PWR)",
+      "note": null,
+      "isBus": false
+    },
+    {
+      "signal": "LED_STATUS",
+      "port": "PB",
+      "num": 0,
+      "af": "GPIO",
+      "direction": "out",
+      "net": "LED_STATUS",
+      "role": "led",
+      "activeLow": false,
+      "label": "LED(LED_STATUS)",
+      "note": null,
+      "isBus": false
+    },
+    {
+      "signal": "I2C1_SCL",
+      "port": "PB",
+      "num": 8,
+      "af": "I2C1",
+      "direction": "alternate",
+      "net": "I2C1_SCL",
+      "role": "bus-i2c",
+      "activeLow": false,
+      "label": "I2C SCL",
+      "note": "I2C 成组识别(SDA+SCL 同在 MCU 上),外设编号为推断值,请按芯片数据手册核对",
+      "isBus": true
+    },
+    {
+      "signal": "I2C1_SDA",
+      "port": "PB",
+      "num": 9,
+      "af": "I2C1",
+      "direction": "alternate",
+      "net": "I2C1_SDA",
+      "role": "bus-i2c",
+      "activeLow": false,
+      "label": "I2C SDA",
+      "note": "I2C 成组识别(SDA+SCL 同在 MCU 上),外设编号为推断值,请按芯片数据手册核对",
+      "isBus": true
+    },
+    {
+      "signal": "OSC_IN",
+      "port": "PD",
+      "num": 0,
+      "af": "GPIO",
+      "direction": "alternate",
+      "net": "OSC_IN",
+      "role": "crystal",
+      "activeLow": false,
+      "label": "晶振(Y1)",
+      "note": "晶振 8MHz 引脚(通常为 OSC 专用功能)",
+      "isBus": false
+    },
+    {
+      "signal": "OSC_OUT",
+      "port": "PD",
+      "num": 1,
+      "af": "GPIO",
+      "direction": "alternate",
+      "net": "OSC_OUT",
+      "role": "crystal",
+      "activeLow": false,
+      "label": "晶振(Y1)",
+      "note": "晶振 8MHz 引脚(通常为 OSC 专用功能)",
+      "isBus": false
+    }
+  ],
+  "issues": [],
+  "summaryMarkdown": "# 硬件分析结果\n- 板卡:blink\n- MCU:U1 / STM32F103C8T6(9 引脚)\n\n## 总线\n| 类型 | 引脚 | 外挂设备 | 备注 |\n|---|---|---|---|\n| I2C | SDA=PB9 SCL=PB8 | U2(BMP280) | I2C 成组识别(SDA+SCL 同在 MCU 上),外设编号为推断值,请按芯片数据手册核对 |\n\n## GPIO\n| MCU 引脚 | 网络 | 角色 | 方向 | 极性 | 器件 |\n|---|---|---|---|---|---|\n| U1.PA0 | SW_USER | button | in | 低电平有效 | SW1(按键(SW_Push)) |\n| U1.PA5 | Net-(D1-K) | led | out | 低电平有效 | D1(LED(LED_PWR)) |\n| U1.PB0 | LED_STATUS | led | out | 高电平有效 | D2(LED(LED_STATUS)) |\n\n## 电源\n- 电源轨:3V3(11 连接)、GND(9 连接)、5V(1 连接)\n- 退耦电容:4 个(0.1u/100n 级)\n- 电源器件:U3(AMS1117-3.3)\n- 晶振:Y1(8MHz)\n\n## 网络连接表\n- `GND`: U1.VSS, U2.GND, U3.GND, D2.K, SW1.2, C1.2, C2.2, C3.1, C4.2\n- `3V3`: U3.VOUT, U1.VDD, U2.VCC, D1.A, R1.2, R2.1, R3.1, C1.1, C2.1, C3.2, C4.1\n- `5V`: U3.VIN\n- `LED_STATUS`: U1.PB0, D2.A\n- `Net-(D1-K)`: U1.PA5, D1.K\n- `SW_USER`: U1.PA0, SW1.1, R1.1\n- `I2C1_SDA`: U1.PB9, U2.SDA, R2.2\n- `I2C1_SCL`: U1.PB8, U2.SCL, R3.2\n- `OSC_IN`: U1.PD0, Y1.1\n- `OSC_OUT`: U1.PD1, Y1.2\n\n## 问题与提示\n(无)",
+  "sourceFormat": "kicad",
+  "model": {
+    "format": "kicad",
+    "boardName": "blink",
+    "components": [
+      {
+        "ref": "U1",
+        "value": "STM32F103C8T6",
+        "footprint": "Package_QFP:LQFP-48_7x7mm_P0.5mm",
+        "type": null,
+        "pins": [
+          {
+            "pin": "VSS",
+            "net": "GND"
+          },
+          {
+            "pin": "VDD",
+            "net": "3V3"
+          },
+          {
+            "pin": "PB0",
+            "net": "LED_STATUS"
+          },
+          {
+            "pin": "PA5",
+            "net": "Net-(D1-K)"
+          },
+          {
+            "pin": "PA0",
+            "net": "SW_USER"
+          },
+          {
+            "pin": "PB9",
+            "net": "I2C1_SDA"
+          },
+          {
+            "pin": "PB8",
+            "net": "I2C1_SCL"
+          },
+          {
+            "pin": "PD0",
+            "net": "OSC_IN"
+          },
+          {
+            "pin": "PD1",
+            "net": "OSC_OUT"
+          }
+        ]
+      },
+      {
+        "ref": "U2",
+        "value": "BMP280",
+        "footprint": "Package_LGA:Bosch_LGA-8_2x2.5mm_P0.65mm",
+        "type": null,
+        "pins": [
+          {
+            "pin": "GND",
+            "net": "GND"
+          },
+          {
+            "pin": "VCC",
+            "net": "3V3"
+          },
+          {
+            "pin": "SDA",
+            "net": "I2C1_SDA"
+          },
+          {
+            "pin": "SCL",
+            "net": "I2C1_SCL"
+          }
+        ]
+      },
+      {
+        "ref": "U3",
+        "value": "AMS1117-3.3",
+        "footprint": "Package_TO_SOT_SMD:SOT-223-3",
+        "type": null,
+        "pins": [
+          {
+            "pin": "GND",
+            "net": "GND"
+          },
+          {
+            "pin": "VOUT",
+            "net": "3V3"
+          },
+          {
+            "pin": "VIN",
+            "net": "5V"
+          }
+        ]
+      },
+      {
+        "ref": "D1",
+        "value": "LED_PWR",
+        "footprint": "LED_SMD:LED_0603_1608Metric",
+        "type": null,
+        "pins": [
+          {
+            "pin": "A",
+            "net": "3V3"
+          },
+          {
+            "pin": "K",
+            "net": "Net-(D1-K)"
+          }
+        ]
+      },
+      {
+        "ref": "D2",
+        "value": "LED_STATUS",
+        "footprint": "LED_SMD:LED_0603_1608Metric",
+        "type": null,
+        "pins": [
+          {
+            "pin": "K",
+            "net": "GND"
+          },
+          {
+            "pin": "A",
+            "net": "LED_STATUS"
+          }
+        ]
+      },
+      {
+        "ref": "SW1",
+        "value": "SW_Push",
+        "footprint": "Button_SMD:SW_SPST_PTS645",
+        "type": null,
+        "pins": [
+          {
+            "pin": "2",
+            "net": "GND"
+          },
+          {
+            "pin": "1",
+            "net": "SW_USER"
+          }
+        ]
+      },
+      {
+        "ref": "R1",
+        "value": "10k",
+        "footprint": "Resistor_SMD:R_0603",
+        "type": null,
+        "pins": [
+          {
+            "pin": "2",
+            "net": "3V3"
+          },
+          {
+            "pin": "1",
+            "net": "SW_USER"
+          }
+        ]
+      },
+      {
+        "ref": "R2",
+        "value": "4.7k",
+        "footprint": "Resistor_SMD:R_0603",
+        "type": null,
+        "pins": [
+          {
+            "pin": "1",
+            "net": "3V3"
+          },
+          {
+            "pin": "2",
+            "net": "I2C1_SDA"
+          }
+        ]
+      },
+      {
+        "ref": "R3",
+        "value": "4.7k",
+        "footprint": "Resistor_SMD:R_0603",
+        "type": null,
+        "pins": [
+          {
+            "pin": "1",
+            "net": "3V3"
+          },
+          {
+            "pin": "2",
+            "net": "I2C1_SCL"
+          }
+        ]
+      },
+      {
+        "ref": "Y1",
+        "value": "8MHz",
+        "footprint": "Crystal:Crystal_HC49-4H",
+        "type": null,
+        "pins": [
+          {
+            "pin": "1",
+            "net": "OSC_IN"
+          },
+          {
+            "pin": "2",
+            "net": "OSC_OUT"
+          }
+        ]
+      },
+      {
+        "ref": "C1",
+        "value": "100n",
+        "footprint": "Capacitor_SMD:C_0603",
+        "type": null,
+        "pins": [
+          {
+            "pin": "2",
+            "net": "GND"
+          },
+          {
+            "pin": "1",
+            "net": "3V3"
+          }
+        ]
+      },
+      {
+        "ref": "C2",
+        "value": "100n",
+        "footprint": "Capacitor_SMD:C_0603",
+        "type": null,
+        "pins": [
+          {
+            "pin": "2",
+            "net": "GND"
+          },
+          {
+            "pin": "1",
+            "net": "3V3"
+          }
+        ]
+      },
+      {
+        "ref": "C3",
+        "value": "100n",
+        "footprint": "Capacitor_SMD:C_0603",
+        "type": null,
+        "pins": [
+          {
+            "pin": "1",
+            "net": "GND"
+          },
+          {
+            "pin": "2",
+            "net": "3V3"
+          }
+        ]
+      },
+      {
+        "ref": "C4",
+        "value": "100n",
+        "footprint": "Capacitor_SMD:C_0603",
+        "type": null,
+        "pins": [
+          {
+            "pin": "2",
+            "net": "GND"
+          },
+          {
+            "pin": "1",
+            "net": "3V3"
+          }
+        ]
+      }
+    ],
+    "nets": [
+      {
+        "name": "GND",
+        "connections": [
+          {
+            "ref": "U1",
+            "pin": "VSS"
+          },
+          {
+            "ref": "U2",
+            "pin": "GND"
+          },
+          {
+            "ref": "U3",
+            "pin": "GND"
+          },
+          {
+            "ref": "D2",
+            "pin": "K"
+          },
+          {
+            "ref": "SW1",
+            "pin": "2"
+          },
+          {
+            "ref": "C1",
+            "pin": "2"
+          },
+          {
+            "ref": "C2",
+            "pin": "2"
+          },
+          {
+            "ref": "C3",
+            "pin": "1"
+          },
+          {
+            "ref": "C4",
+            "pin": "2"
+          }
+        ]
+      },
+      {
+        "name": "3V3",
+        "connections": [
+          {
+            "ref": "U3",
+            "pin": "VOUT"
+          },
+          {
+            "ref": "U1",
+            "pin": "VDD"
+          },
+          {
+            "ref": "U2",
+            "pin": "VCC"
+          },
+          {
+            "ref": "D1",
+            "pin": "A"
+          },
+          {
+            "ref": "R1",
+            "pin": "2"
+          },
+          {
+            "ref": "R2",
+            "pin": "1"
+          },
+          {
+            "ref": "R3",
+            "pin": "1"
+          },
+          {
+            "ref": "C1",
+            "pin": "1"
+          },
+          {
+            "ref": "C2",
+            "pin": "1"
+          },
+          {
+            "ref": "C3",
+            "pin": "2"
+          },
+          {
+            "ref": "C4",
+            "pin": "1"
+          }
+        ]
+      },
+      {
+        "name": "5V",
+        "connections": [
+          {
+            "ref": "U3",
+            "pin": "VIN"
+          }
+        ]
+      },
+      {
+        "name": "LED_STATUS",
+        "connections": [
+          {
+            "ref": "U1",
+            "pin": "PB0"
+          },
+          {
+            "ref": "D2",
+            "pin": "A"
+          }
+        ]
+      },
+      {
+        "name": "Net-(D1-K)",
+        "connections": [
+          {
+            "ref": "U1",
+            "pin": "PA5"
+          },
+          {
+            "ref": "D1",
+            "pin": "K"
+          }
+        ]
+      },
+      {
+        "name": "SW_USER",
+        "connections": [
+          {
+            "ref": "U1",
+            "pin": "PA0"
+          },
+          {
+            "ref": "SW1",
+            "pin": "1"
+          },
+          {
+            "ref": "R1",
+            "pin": "1"
+          }
+        ]
+      },
+      {
+        "name": "I2C1_SDA",
+        "connections": [
+          {
+            "ref": "U1",
+            "pin": "PB9"
+          },
+          {
+            "ref": "U2",
+            "pin": "SDA"
+          },
+          {
+            "ref": "R2",
+            "pin": "2"
+          }
+        ]
+      },
+      {
+        "name": "I2C1_SCL",
+        "connections": [
+          {
+            "ref": "U1",
+            "pin": "PB8"
+          },
+          {
+            "ref": "U2",
+            "pin": "SCL"
+          },
+          {
+            "ref": "R3",
+            "pin": "2"
+          }
+        ]
+      },
+      {
+        "name": "OSC_IN",
+        "connections": [
+          {
+            "ref": "U1",
+            "pin": "PD0"
+          },
+          {
+            "ref": "Y1",
+            "pin": "1"
+          }
+        ]
+      },
+      {
+        "name": "OSC_OUT",
+        "connections": [
+          {
+            "ref": "U1",
+            "pin": "PD1"
+          },
+          {
+            "ref": "Y1",
+            "pin": "2"
+          }
+        ]
+      }
+    ],
+    "warnings": []
+  }
+}
